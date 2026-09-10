@@ -1,0 +1,46 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    --color-ink: #0f172a;
+    --color-paper: #f6f5f1;
+    --color-brand: #1d4ed8;
+    --color-brand-strong: #1e3a8a;
+}
+
+@layer base {
+    html { background: var(--color-paper); }
+    body { color: var(--color-ink); }
+    [x-cloak] { display: none !important; }
+}
+
+@utility btn-base {
+    @apply inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition cursor-pointer select-none;
+}
+@utility pill-base {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap;
+}
+
+@layer components {
+    .btn-primary { @apply btn-base bg-brand text-white hover:bg-brand-strong; }
+    .btn-ghost { @apply btn-base bg-transparent text-slate-700 hover:bg-slate-200/70; }
+    .btn-danger { @apply btn-base text-red-700 hover:bg-red-50; }
+    .field { @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand focus:ring-2 focus:ring-brand/20 focus:outline-none; }
+    .label { @apply mb-1 block text-xs font-semibold tracking-wide text-slate-600 uppercase; }
+    .card { @apply rounded-lg border border-slate-200 bg-white shadow-sm; }
+    .pill-slate { @apply pill-base bg-slate-200 text-slate-700; }
+    .pill-blue { @apply pill-base bg-blue-100 text-blue-800; }
+    .pill-amber { @apply pill-base bg-amber-100 text-amber-800; }
+    .pill-emerald { @apply pill-base bg-emerald-100 text-emerald-800; }
+    .pill-red { @apply pill-base bg-red-100 text-red-800; }
+}
+
+.vix-ghost { opacity: 0.4; }
+.vix-drag { box-shadow: 0 10px 25px rgb(0 0 0 / 0.15); }
+[data-handle], [data-phase-handle], [data-step-handle] { cursor: grab; }
+[data-handle]:active, [data-phase-handle]:active, [data-step-handle]:active { cursor: grabbing; }

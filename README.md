@@ -1,0 +1,87 @@
+# VIXORGANIZE
+
+Fila priorizada de projetos com kanban de fases e checklist por fase. Feito para o gerente tocar os projetos sem aprender ferramenta nova: entra, vê a ordem de prioridade, abre o projeto, marca o CHECK do passo que concluiu.
+
+Stack: Laravel 13 + PHP 8.3 + Postgres (Supabase) + Blade + Alpine.js + Tailwind 4.
+
+## O que faz
+
+- **Fila de projetos** com rank ordenável (só existe um projeto na posição 1). Arrasta pela alça ou usa ▲▼.
+- **Limite de WIP**: acima de `VIX_WIP_LIMIT` projetos "em andamento" a tela avisa em vermelho.
+- **Kanban por projeto**: cada fase é uma coluna. Fases podem ser renomeadas (duplo clique), reordenadas (arrastar), adicionadas e removidas.
+- **Checklist por fase**: cada passo tem CHECK. Quando todos os passos da fase estão marcados, a fase fecha sozinha e a "fase atual" avança. Quando todas as fases fecham, o projeto vira "Concluído".
+- **Pipeline padrão** aplicado a todo projeto novo (6 fases: Descoberta, Planejamento, Execução, Validação, Entrega, Encerramento). Editável em `config/vix.php`.
+- **Histórico**: quem marcou o quê e quando, por projeto.
+- **API JSON** somente leitura para n8n / relatórios: `GET /api/projetos` e `GET /api/projetos/{slug}` com header `X-Api-Key`.
+
+## Rodar local (SQLite, sem Supabase)
+
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan db:seed --class=DemoSeeder   # opcional: 4 projetos de exemplo
+npm run build
+php artisan serve
+```
+
+Acesse http://localhost:8000. Usuários criados pelo seed (senha padrão `vixorganize`, definida em `SEED_PASSWORD`):
+
+| Usuário | E-mail |
+|---|---|
+| Vitão | vitor@vixorganize.local |
+| Felipe | felipe@vixorganize.local |
+
+Troque nome, e-mail e senha no `.env` (`SEED_*`) antes de rodar o seed, ou edite direto na tabela `users`.
+
+## Conectar no Supabase
+
+No painel do Supabase: **Project Settings → Database → Connection string**. Use o **Session pooler** (porta 5432) para migrations e o app; o Transaction pooler (6543) não suporta prepared statements e quebra o Laravel.
+
+No `.env`:
+
+```env
+DB_CONNECTION=pgsql
+DB_HOST=aws-0-sa-east-1.pooler.supabase.com
+DB_PORT=5432
+DB_DATABASE=postgres
+DB_USERNAME=postgres.SEU_PROJECT_REF
+DB_PASSWORD=SUA_SENHA
+DB_SSLMODE=require
+```
+
+Depois:
+
+```bash
+php artisan migrate --seed
+```
+
+O Supabase Auth não é usado: o login é sessão do próprio Laravel (tabela `users`). Se quiser trocar para Supabase Auth mais tarde, só o `AuthController` muda.
+
+## API para n8n
+
+Defina `VIX_API_KEY` no `.env` (qualquer string longa). Com a chave vazia a API fica desligada.
+
+```bash
+curl -H "X-Api-Key: SUA_CHAVE" https://seu-host/api/projetos
+```
+
+Retorna rank, status, fase atual, progresso e prazo de cada projeto. O endpoint por slug retorna também as fases e os passos com quem marcou e quando.
+
+## Estrutura
+
+```
+app/Models/Project.php        projeto, rank, status, fase atual, progresso
+app/Models/Phase.php          coluna do kanban; fecha sozinha quando todos os passos estão feitos
+app/Models/Step.php           passo com CHECK (done_at, done_by)
+app/Models/Activity.php       histórico
+app/Services/ProjectTemplate.php  aplica o pipeline padrão
+config/vix.php                limite de WIP, statuses e o pipeline padrão
+resources/views/projects/     index (fila), show (kanban), create/edit
+```
+
+## Deploy
+
+Qualquer host PHP 8.3 com `pdo_pgsql` serve (Laravel Forge, Railway, Render, VPS com Nginx). Rode `npm run build` antes de subir ou no pipeline, e aponte o document root para `public/`.
