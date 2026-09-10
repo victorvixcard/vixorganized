@@ -4,7 +4,7 @@ import {
     createIcons,
     AlertTriangle, ArrowLeft, CalendarDays, Check, ChevronDown, ChevronUp, CircleCheck,
     GripVertical, Info, Keyboard, ListChecks, LogOut, Moon, MoreHorizontal, Pencil, Plus,
-    Sun, Trash2, User, X, Clock, Flag, Kanban, Search,
+    Sun, Trash2, User, X, Clock, Flag, Kanban, Search, Mail, KeyRound, Eye, EyeOff,
 } from 'lucide';
 
 window.Alpine = Alpine;
@@ -14,7 +14,7 @@ window.Sortable = Sortable;
 const ICONS = {
     AlertTriangle, ArrowLeft, CalendarDays, Check, ChevronDown, ChevronUp, CircleCheck,
     GripVertical, Info, Keyboard, ListChecks, LogOut, Moon, MoreHorizontal, Pencil, Plus,
-    Sun, Trash2, User, X, Clock, Flag, Kanban, Search,
+    Sun, Trash2, User, X, Clock, Flag, Kanban, Search, Mail, KeyRound, Eye, EyeOff,
 };
 window.vixIcons = () => createIcons({ icons: ICONS, attrs: { 'stroke-width': 2, 'aria-hidden': 'true' } });
 

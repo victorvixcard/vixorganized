@@ -191,3 +191,30 @@
     .pulse-ring, .animate-pulse { animation: none; }
     * { transition-duration: 0.01ms !important; }
 }
+
+/* ===== Login ===== */
+.login-visual {
+    background: linear-gradient(155deg, hsl(195 55% 12%) 0%, hsl(192 52% 17%) 60%, hsl(198 55% 9%) 100%);
+}
+.login-visual::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: radial-gradient(hsl(190 30% 92% / 0.09) 1px, transparent 1px);
+    background-size: 22px 22px; opacity: 0.5;
+}
+.login-visual::after {
+    content: ""; position: absolute; width: 480px; height: 480px; border-radius: 50%;
+    right: -170px; bottom: -190px; pointer-events: none;
+    background: radial-gradient(circle, hsl(190 60% 52%) 0%, transparent 68%); opacity: 0.22;
+}
+.login-step-line::before {
+    content: ""; position: absolute; left: 11px; top: 26px; bottom: -2px; width: 1px;
+    background: hsl(190 40% 30%);
+}
+@keyframes login-rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.login-rise { opacity: 0; animation: login-rise .55s ease-out forwards; animation-delay: var(--d, 0s); }
+@media (prefers-reduced-motion: reduce) {
+    .login-rise { opacity: 1; animation: none; }
+}
