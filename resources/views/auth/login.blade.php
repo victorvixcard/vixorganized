@@ -58,13 +58,15 @@
             <h1 class="font-display text-2xl font-extrabold tracking-tight">Entrar</h1>
             <p class="mt-1.5 text-sm text-muted-foreground">Acesse a fila de projetos.</p>
 
-            <form method="post" action="{{ route('login') }}" class="mt-8 space-y-5" x-data="{ show: false, sending: false }" @submit="sending = true" novalidate>
+            <form method="post" action="{{ route('login') }}" class="mt-8 space-y-5"
+                  x-data="{ show: false, sending: false, fill(email) { $refs.email.value = email; $refs.password.value = {{ Js::from($demoPassword ?? '') }}; $refs.password.focus(); } }"
+                  @submit="sending = true" novalidate>
                 @csrf
                 <div>
                     <label class="label" for="email">E-mail</label>
                     <div class="relative">
                         <i data-lucide="mail" class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"></i>
-                        <input class="field h-11 pl-10 {{ $errors->has('email') ? 'border-destructive' : '' }}" id="email" name="email" type="email"
+                        <input x-ref="email" class="field h-11 pl-10 {{ $errors->has('email') ? 'border-destructive' : '' }}" id="email" name="email" type="email"
                                value="{{ old('email') }}" required autofocus autocomplete="email" inputmode="email" placeholder="voce@empresa.com.br">
                     </div>
                     @error('email')<p class="error">{{ $message }}</p>@enderror
@@ -74,7 +76,7 @@
                     <label class="label" for="password">Senha</label>
                     <div class="relative">
                         <i data-lucide="key-round" class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"></i>
-                        <input class="field h-11 pr-11 pl-10" id="password" name="password" :type="show ? 'text' : 'password'" required autocomplete="current-password">
+                        <input x-ref="password" class="field h-11 pr-11 pl-10" id="password" name="password" :type="show ? 'text' : 'password'" required autocomplete="current-password">
                         <button type="button" @click="show = !show" class="absolute top-1/2 right-1 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground"
                                 :aria-label="show ? 'Ocultar senha' : 'Mostrar senha'" :aria-pressed="show">
                             <i data-lucide="eye" class="h-4 w-4" x-show="!show"></i>
@@ -92,9 +94,34 @@
                     <span x-show="!sending">Entrar</span>
                     <span x-show="sending" x-cloak>Entrando</span>
                 </button>
+
+                @if (! empty($demo))
+                    <div class="pt-3">
+                        <div class="mb-2 flex items-center gap-3">
+                            <span class="h-px flex-1 bg-border"></span>
+                            <span class="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Acesso rápido (ambiente local)</span>
+                            <span class="h-px flex-1 bg-border"></span>
+                        </div>
+                        <div class="grid gap-2 sm:grid-cols-2">
+                            @foreach ($demo as $d)
+                                <button type="button" @click="fill({{ Js::from($d['email']) }})"
+                                        class="flex items-center gap-2.5 rounded-md border border-border bg-card px-3 py-2 text-left transition-colors hover:border-ring hover:bg-muted">
+                                    <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/10 font-display text-sm font-bold text-primary">{{ mb_substr($d['name'], 0, 1) }}</span>
+                                    <span class="min-w-0">
+                                        <span class="block truncate text-sm font-medium">{{ $d['name'] }} <span class="font-normal text-muted-foreground">· {{ $d['role'] }}</span></span>
+                                        <span class="block truncate font-mono text-[11px] text-muted-foreground">{{ $d['email'] }}</span>
+                                    </span>
+                                </button>
+                            @endforeach
+                        </div>
+                        <p class="help">Senha de todos: <span class="font-mono text-foreground">{{ $demoPassword }}</span>. Clique no usuário para preencher.</p>
+                    </div>
+                @endif
             </form>
 
-            <p class="mt-8 text-xs text-muted-foreground">Sem conta? Peça acesso ao administrador.</p>
+            @if (empty($demo))
+                <p class="mt-8 text-xs text-muted-foreground">Sem conta? Peça acesso ao administrador.</p>
+            @endif
         </div>
     </div>
 </div>

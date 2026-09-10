@@ -15,7 +15,16 @@ class AuthController extends Controller
             return redirect()->route('projects.index');
         }
 
-        return view('auth.login');
+        // Acesso rápido só em ambiente local: chips que preenchem o formulário.
+        $demo = app()->environment('local') ? [
+            ['name' => env('SEED_ADMIN_NAME', 'Vitão'), 'role' => 'Admin', 'email' => env('SEED_ADMIN_EMAIL', 'vitor@vixorganize.local')],
+            ['name' => env('SEED_MANAGER_NAME', 'Felipe'), 'role' => 'Gerente', 'email' => env('SEED_MANAGER_EMAIL', 'felipe@vixorganize.local')],
+        ] : [];
+
+        return view('auth.login', [
+            'demo' => $demo,
+            'demoPassword' => app()->environment('local') ? env('SEED_PASSWORD', 'vixorganize') : null,
+        ]);
     }
 
     public function login(Request $request): RedirectResponse
