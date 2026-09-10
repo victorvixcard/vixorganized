@@ -19,7 +19,7 @@ class ProjectController extends Controller
         $showDone = $request->boolean('concluidos');
 
         $projects = Project::query()
-            ->with(['owner', 'currentPhase'])
+            ->with(['owner', 'currentPhase', 'phases:id,project_id,name,position,completed_at'])
             ->withCount([
                 'steps',
                 'steps as done_steps_count' => fn ($q) => $q->where('is_done', true),
@@ -28,14 +28,22 @@ class ProjectController extends Controller
             ->orderBy('rank')
             ->get();
 
-        $inProgress = Project::where('status', 'em_andamento')->count();
+        $byStatus = Project::query()->selectRaw('status, count(*) as n')->groupBy('status')->pluck('n', 'status');
+
+        $kpi = [
+            'total' => (int) $byStatus->sum(),
+            'em_andamento' => (int) ($byStatus['em_andamento'] ?? 0),
+            'aguardando' => (int) ($byStatus['aguardando'] ?? 0),
+            'pausado' => (int) ($byStatus['pausado'] ?? 0),
+            'concluido' => (int) ($byStatus['concluido'] ?? 0),
+            'atrasados' => Project::where('status', '!=', 'concluido')->whereDate('due_date', '<', today())->count(),
+        ];
 
         return view('projects.index', [
             'projects' => $projects,
-            'inProgress' => $inProgress,
+            'kpi' => $kpi,
             'wipLimit' => config('vix.wip_limit'),
             'showDone' => $showDone,
-            'doneCount' => Project::where('status', 'concluido')->count(),
         ]);
     }
 
@@ -77,8 +85,9 @@ class ProjectController extends Controller
         // Estado inicial do board para o Alpine (atualizado via JSON nos toggles).
         $board = [
             'progress' => $project->progress(),
+            'status' => $project->status,
             'statusLabel' => $project->statusLabel(),
-            'currentPhase' => $project->currentPhase?->name ?? '—',
+            'currentPhase' => $project->currentPhase?->name,
             'currentPhaseId' => $project->current_phase_id,
             'phases' => (object) $project->phases->mapWithKeys(fn ($p) => [$p->id => [
                 'done' => $p->isDone(),

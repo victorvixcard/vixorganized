@@ -4,43 +4,190 @@
 @source '../../storage/framework/views/*.php';
 @source '../views/**/*.blade.php';
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
-    --color-ink: #0f172a;
-    --color-paper: #f6f5f1;
-    --color-brand: #1d4ed8;
-    --color-brand-strong: #1e3a8a;
+/* Dark mode por classe .dark no <html>, controlada pelo Alpine ($store.theme). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* =====================================================================
+   TOKENS HSL. Trocar a identidade inteira = trocar os valores aqui.
+   Petróleo (primary) sobre neutro frio. Uma cor de accent só.
+   Status do workflow tem namespace próprio (--status-*).
+   ===================================================================== */
+:root {
+    --background: 210 20% 98%;
+    --foreground: 222 30% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 30% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 30% 11%;
+
+    --primary: 190 62% 30%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 190 60% 42%;
+    --primary-deep: 195 55% 18%;
+
+    --secondary: 210 16% 94%;
+    --secondary-foreground: 222 24% 20%;
+
+    --muted: 210 16% 94%;
+    --muted-foreground: 215 14% 42%;
+
+    --destructive: 0 66% 46%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 55% 34%;
+    --warning: 32 92% 44%;
+
+    --border: 214 18% 88%;
+    --input: 214 18% 82%;
+    --ring: 190 62% 38%;
+
+    --status-aguardando: 215 14% 50%;
+    --status-em_andamento: 199 84% 40%;
+    --status-pausado: 32 92% 44%;
+    --status-concluido: 152 55% 34%;
+
+    --radius: 0.5rem;
+}
+
+.dark {
+    --background: 222 22% 9%;
+    --foreground: 210 20% 92%;
+
+    --card: 222 20% 12%;
+    --card-foreground: 210 20% 92%;
+    --popover: 222 20% 13%;
+    --popover-foreground: 210 20% 92%;
+
+    --primary: 190 60% 52%;
+    --primary-foreground: 222 30% 8%;
+    --primary-glow: 190 60% 62%;
+    --primary-deep: 195 55% 14%;
+
+    --secondary: 222 16% 17%;
+    --secondary-foreground: 210 20% 85%;
+
+    --muted: 222 16% 16%;
+    --muted-foreground: 215 14% 62%;
+
+    --destructive: 0 66% 58%;
+    --destructive-foreground: 222 30% 8%;
+    --success: 152 50% 48%;
+    --warning: 32 92% 58%;
+
+    --border: 222 14% 20%;
+    --input: 222 14% 26%;
+    --ring: 190 60% 55%;
+
+    --status-aguardando: 215 14% 62%;
+    --status-em_andamento: 199 80% 58%;
+    --status-pausado: 32 92% 60%;
+    --status-concluido: 152 50% 50%;
+}
+
+@theme inline {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --color-background: hsl(var(--background));
+    --color-foreground: hsl(var(--foreground));
+    --color-card: hsl(var(--card));
+    --color-card-foreground: hsl(var(--card-foreground));
+    --color-popover: hsl(var(--popover));
+    --color-popover-foreground: hsl(var(--popover-foreground));
+    --color-primary: hsl(var(--primary));
+    --color-primary-foreground: hsl(var(--primary-foreground));
+    --color-primary-glow: hsl(var(--primary-glow));
+    --color-primary-deep: hsl(var(--primary-deep));
+    --color-secondary: hsl(var(--secondary));
+    --color-secondary-foreground: hsl(var(--secondary-foreground));
+    --color-muted: hsl(var(--muted));
+    --color-muted-foreground: hsl(var(--muted-foreground));
+    --color-destructive: hsl(var(--destructive));
+    --color-destructive-foreground: hsl(var(--destructive-foreground));
+    --color-success: hsl(var(--success));
+    --color-warning: hsl(var(--warning));
+    --color-border: hsl(var(--border));
+    --color-input: hsl(var(--input));
+    --color-ring: hsl(var(--ring));
+
+    --radius-md: var(--radius);
+    --radius-lg: calc(var(--radius) + 0.25rem);
+    --radius-sm: calc(var(--radius) - 0.2rem);
 }
 
 @layer base {
-    html { background: var(--color-paper); }
-    body { color: var(--color-ink); }
+    html { background: hsl(var(--background)); color-scheme: light; }
+    html.dark { color-scheme: dark; }
+    body { color: hsl(var(--foreground)); font-feature-settings: 'cv11', 'ss01'; }
     [x-cloak] { display: none !important; }
+    * { border-color: hsl(var(--border)); }
+
+    /* Foco visível em tudo que é interativo. Nunca outline:none órfão. */
+    :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+        outline: 2px solid hsl(var(--ring));
+        outline-offset: 2px;
+        border-radius: var(--radius-sm);
+    }
+    input:focus-visible, select:focus-visible, textarea:focus-visible {
+        outline-offset: 0;
+        border-radius: var(--radius-md);
+    }
+
+    button, [role="button"] { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: 0.45; }
+
+    svg.lucide { flex-shrink: 0; }
 }
 
 @utility btn-base {
-    @apply inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition cursor-pointer select-none;
+    @apply inline-flex h-9 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium whitespace-nowrap transition-[background-color,color,transform,box-shadow] duration-150 select-none active:translate-y-px;
 }
 @utility pill-base {
-    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap;
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap;
 }
 
 @layer components {
-    .btn-primary { @apply btn-base bg-brand text-white hover:bg-brand-strong; }
-    .btn-ghost { @apply btn-base bg-transparent text-slate-700 hover:bg-slate-200/70; }
-    .btn-danger { @apply btn-base text-red-700 hover:bg-red-50; }
-    .field { @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand focus:ring-2 focus:ring-brand/20 focus:outline-none; }
-    .label { @apply mb-1 block text-xs font-semibold tracking-wide text-slate-600 uppercase; }
-    .card { @apply rounded-lg border border-slate-200 bg-white shadow-sm; }
-    .pill-slate { @apply pill-base bg-slate-200 text-slate-700; }
-    .pill-blue { @apply pill-base bg-blue-100 text-blue-800; }
-    .pill-amber { @apply pill-base bg-amber-100 text-amber-800; }
-    .pill-emerald { @apply pill-base bg-emerald-100 text-emerald-800; }
-    .pill-red { @apply pill-base bg-red-100 text-red-800; }
+    .btn-primary { @apply btn-base bg-primary text-primary-foreground shadow-sm hover:bg-primary/90; }
+    .btn-outline { @apply btn-base border border-input bg-card text-foreground hover:bg-muted; }
+    .btn-ghost { @apply btn-base text-muted-foreground hover:bg-muted hover:text-foreground; }
+    .btn-danger { @apply btn-base text-destructive hover:bg-destructive/10; }
+    .btn-icon { @apply h-9 w-9 px-0; }
+
+    .field { @apply block h-10 w-full rounded-md border border-input bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-ring; }
+    textarea.field { @apply h-auto py-2; }
+    select.field { @apply pr-8; }
+    .label { @apply mb-1.5 block text-sm font-medium text-foreground; }
+    .help { @apply mt-1.5 text-xs text-muted-foreground; }
+    .error { @apply mt-1.5 text-xs font-medium text-destructive; }
+
+    .panel { @apply rounded-lg border border-border bg-card; }
+
+    .pill-muted { @apply pill-base border-border bg-muted text-muted-foreground; }
+    .pill-danger { @apply pill-base border-destructive/30 bg-destructive/10 text-destructive; }
+
+    .menu { @apply absolute right-0 z-30 mt-1 min-w-44 rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg; }
+    .menu-item { @apply flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm hover:bg-muted; }
+    .menu-item-danger { @apply text-destructive hover:bg-destructive/10; }
+    .menu-sep { @apply my-1 h-px bg-border; }
+
+    .kbd { @apply inline-flex h-5 min-w-5 items-center justify-center rounded border border-border bg-muted px-1 font-mono text-[10px] font-semibold text-muted-foreground; }
 }
 
-.vix-ghost { opacity: 0.4; }
-.vix-drag { box-shadow: 0 10px 25px rgb(0 0 0 / 0.15); }
-[data-handle], [data-phase-handle], [data-step-handle] { cursor: grab; }
+/* Estado do drag (SortableJS) */
+.vix-ghost { opacity: 0.35; }
+.vix-drag { box-shadow: 0 12px 28px -8px hsl(var(--foreground) / 0.25); }
+[data-handle], [data-phase-handle], [data-step-handle] { cursor: grab; touch-action: none; }
 [data-handle]:active, [data-phase-handle]:active, [data-step-handle]:active { cursor: grabbing; }
+
+/* Pulso só em indicador de estado ativo real (fase atual, em andamento). */
+@keyframes vix-pulse-ring {
+    0% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.45); }
+    100% { box-shadow: 0 0 0 8px hsl(var(--primary) / 0); }
+}
+.pulse-ring { animation: vix-pulse-ring 1.8s ease-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+    .pulse-ring, .animate-pulse { animation: none; }
+    * { transition-duration: 0.01ms !important; }
+}

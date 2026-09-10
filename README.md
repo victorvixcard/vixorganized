@@ -2,7 +2,9 @@
 
 Fila priorizada de projetos com kanban de fases e checklist por fase. Feito para o gerente tocar os projetos sem aprender ferramenta nova: entra, vê a ordem de prioridade, abre o projeto, marca o CHECK do passo que concluiu.
 
-Stack: Laravel 13 + PHP 8.3 + Postgres (Supabase) + Blade + Alpine.js + Tailwind 4.
+Stack: Laravel 13 + PHP 8.3 + Postgres (Supabase) + Blade + Alpine.js + Tailwind 4 + Lucide.
+
+Interface: tema claro e escuro (botão no topo, segue o sistema por padrão), tokens HSL em `resources/css/app.css` (trocar a identidade inteira é trocar os valores lá), fontes Inter (texto), Plus Jakarta Sans (títulos) e JetBrains Mono (números). Atalho `N` abre novo projeto.
 
 ## O que faz
 
