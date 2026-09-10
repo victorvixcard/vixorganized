@@ -5,6 +5,7 @@ import {
     AlertTriangle, ArrowLeft, CalendarDays, Check, ChevronDown, ChevronUp, CircleCheck,
     GripVertical, Info, Keyboard, ListChecks, LogOut, Moon, MoreHorizontal, Pencil, Plus,
     Sun, Trash2, User, X, Clock, Flag, Kanban, Search, Mail, KeyRound, Eye, EyeOff,
+    Menu, ListOrdered, ChevronLeft, ChevronRight, MessageSquare, Send, StickyNote,
 } from 'lucide';
 
 window.Alpine = Alpine;
@@ -15,23 +16,30 @@ const ICONS = {
     AlertTriangle, ArrowLeft, CalendarDays, Check, ChevronDown, ChevronUp, CircleCheck,
     GripVertical, Info, Keyboard, ListChecks, LogOut, Moon, MoreHorizontal, Pencil, Plus,
     Sun, Trash2, User, X, Clock, Flag, Kanban, Search, Mail, KeyRound, Eye, EyeOff,
+    Menu, ListOrdered, ChevronLeft, ChevronRight, MessageSquare, Send, StickyNote,
 };
 window.vixIcons = () => createIcons({ icons: ICONS, attrs: { 'stroke-width': 2, 'aria-hidden': 'true' } });
 
 const csrf = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 
 /** POST JSON com CSRF. Retorna o JSON da resposta ou lança erro. */
-window.vixPost = async (url, body = {}) => {
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': csrf(),
-            'X-Requested-With': 'XMLHttpRequest',
-        },
-        body: JSON.stringify(body),
-    });
+window.vixPost = async (url, body = {}, method = 'POST') => {
+    const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': csrf(),
+        'X-Requested-With': 'XMLHttpRequest',
+    };
+    // PUT/DELETE via override: o Laravel lê o header e trata como o método real.
+    if (method !== 'POST') headers['X-HTTP-Method-Override'] = method;
+    const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+};
+
+/** GET JSON. */
+window.vixGet = async (url) => {
+    const res = await fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
 };

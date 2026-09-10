@@ -78,6 +78,7 @@ class ProjectController extends Controller
         $project->load([
             'owner',
             'currentPhase',
+            'phases.steps' => fn ($q) => $q->withCount('comments'),
             'phases.steps.doneBy',
             'activities' => fn ($q) => $q->with('user')->limit(30),
         ]);
@@ -95,12 +96,28 @@ class ProjectController extends Controller
                 'total' => $p->steps->count(),
             ]])->all(),
             'steps' => (object) $project->phases->flatMap->steps->mapWithKeys(fn ($s) => [$s->id => [
+                'title' => $s->title,
+                'notes' => $s->notes,
+                'comments' => $s->comments_count ?? 0,
                 'done' => $s->is_done,
                 'meta' => $s->is_done ? trim(($s->doneBy?->name ?? '').' '.($s->done_at?->format('d/m H:i') ?? '')) : '',
             ]])->all(),
         ];
 
-        return view('projects.show', ['project' => $project, 'board' => $board]);
+        // Navegação entre projetos na ordem da fila (ativos primeiro, concluídos no fim).
+        $order = Project::query()
+            ->orderByRaw("case when status = 'concluido' then 1 else 0 end")
+            ->orderBy('rank')
+            ->get(['id', 'slug', 'name']);
+        $idx = $order->search(fn ($p) => $p->id === $project->id);
+
+        return view('projects.show', [
+            'project' => $project,
+            'board' => $board,
+            'prevProject' => $idx > 0 ? $order[$idx - 1] : null,
+            'nextProject' => $idx !== false && $idx < $order->count() - 1 ? $order[$idx + 1] : null,
+            'position' => ($idx === false ? 0 : $idx + 1).' de '.$order->count(),
+        ]);
     }
 
     public function edit(Project $project): View

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Step extends Model
 {
@@ -25,5 +26,10 @@ class Step extends Model
     public function doneBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'done_by');
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(StepComment::class)->orderBy('created_at');
     }
 }

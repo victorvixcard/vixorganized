@@ -14,6 +14,9 @@ Interface: tema claro e escuro (botão no topo, segue o sistema por padrão), to
 - **Checklist por fase**: cada passo tem CHECK. Quando todos os passos da fase estão marcados, a fase fecha sozinha e a "fase atual" avança. Quando todas as fases fecham, o projeto vira "Concluído".
 - **Pipeline padrão** aplicado a todo projeto novo (6 fases: Descoberta, Planejamento, Execução, Validação, Entrega, Encerramento). Editável em `config/vix.php`.
 - **Histórico**: quem marcou o quê e quando, por projeto.
+- **Detalhe do passo**: clicar no passo abre um painel lateral com título, observação, status e um registro (comentários com nome, data e hora).
+- **Sidebar** com a fila de projetos para pular entre eles. Anterior/próximo no projeto (atalhos `[` e `]`).
+- **Mobile**: menu vira drawer, painel do passo vira folha inferior.
 - **API JSON** somente leitura para n8n / relatórios: `GET /api/projetos` e `GET /api/projetos/{slug}` com header `X-Api-Key`.
 
 ## Rodar local (SQLite, sem Supabase)

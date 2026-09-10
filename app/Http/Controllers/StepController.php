@@ -8,6 +8,7 @@ use App\Models\Step;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class StepController extends Controller
 {
@@ -79,16 +80,80 @@ class StepController extends Controller
         return back();
     }
 
-    public function update(Request $request, Project $project, Step $step): RedirectResponse
+    /** Detalhe do passo para o painel lateral (JSON). */
+    public function show(Project $project, Step $step): JsonResponse
+    {
+        abort_unless($step->phase?->project_id === $project->id, 404);
+        $step->load(['doneBy', 'comments.user', 'phase']);
+
+        return response()->json(['data' => $this->detail($step)]);
+    }
+
+    public function update(Request $request, Project $project, Step $step): JsonResponse|RedirectResponse
     {
         abort_unless($step->phase?->project_id === $project->id, 404);
         $data = $request->validate([
             'title' => ['required', 'string', 'max:200'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ]);
+
+        $changed = $step->title !== $data['title'] || ($step->notes ?? '') !== ($data['notes'] ?? '');
         $step->update($data);
+        if ($changed) {
+            $project->log('passo', "Passo editado em {$step->phase->name}: {$step->title}");
+        }
+
+        if ($request->expectsJson()) {
+            $step->load(['doneBy', 'comments.user', 'phase']);
+
+            return response()->json(['ok' => true, 'data' => $this->detail($step)]);
+        }
 
         return back();
+    }
+
+    /** Registro no passo: comentário com data, hora e usuário. */
+    public function comment(Request $request, Project $project, Step $step): JsonResponse|RedirectResponse
+    {
+        abort_unless($step->phase?->project_id === $project->id, 404);
+        $data = $request->validate(['body' => ['required', 'string', 'max:4000']]);
+
+        $comment = $step->comments()->create(['user_id' => auth()->id(), 'body' => $data['body']]);
+        $comment->load('user');
+        $project->log('registro', "Registro em {$step->title}: ".Str::limit($data['body'], 120));
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true, 'comment' => $this->commentPayload($comment)]);
+        }
+
+        return back();
+    }
+
+    private function detail(Step $step): array
+    {
+        return [
+            'id' => $step->id,
+            'title' => $step->title,
+            'notes' => $step->notes,
+            'is_done' => $step->is_done,
+            'done_at' => $step->done_at?->format('d/m/Y H:i'),
+            'done_by' => $step->doneBy?->name,
+            'phase' => $step->phase->name,
+            'phase_id' => $step->phase_id,
+            'created_at' => $step->created_at?->format('d/m/Y H:i'),
+            'comments' => $step->comments->map(fn ($c) => $this->commentPayload($c))->values(),
+        ];
+    }
+
+    private function commentPayload($comment): array
+    {
+        return [
+            'id' => $comment->id,
+            'user' => $comment->user?->name ?? 'sistema',
+            'initial' => mb_strtoupper(mb_substr($comment->user?->name ?? 'S', 0, 1)),
+            'body' => $comment->body,
+            'at' => $comment->created_at->format('d/m/Y H:i'),
+        ];
     }
 
     public function destroy(Project $project, Step $step): RedirectResponse

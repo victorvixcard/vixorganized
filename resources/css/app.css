@@ -218,3 +218,14 @@
 @media (prefers-reduced-motion: reduce) {
     .login-rise { opacity: 1; animation: none; }
 }
+
+/* Texto longo sem espaço (URL, código) quebra em vez de estourar o card. */
+.wrap-any { overflow-wrap: anywhere; word-break: break-word; }
+
+/* Painel lateral de detalhe do passo */
+.sheet-enter { animation: sheet-in .2s ease-out; }
+@keyframes sheet-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+@media (max-width: 639px) {
+    @keyframes sheet-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+}
+@media (prefers-reduced-motion: reduce) { .sheet-enter { animation: none; } }

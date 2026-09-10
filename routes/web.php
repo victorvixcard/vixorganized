@@ -35,6 +35,8 @@ Route::middleware('auth')->group(function () {
     // Passos (checklist)
     Route::post('/projetos/{project}/fases/{phase}/passos', [StepController::class, 'store'])->name('steps.store');
     Route::post('/projetos/{project}/fases/{phase}/passos/reordenar', [StepController::class, 'reorder'])->name('steps.reorder');
+    Route::get('/projetos/{project}/passos/{step}', [StepController::class, 'show'])->name('steps.show');
+    Route::post('/projetos/{project}/passos/{step}/registros', [StepController::class, 'comment'])->name('steps.comment');
     Route::post('/projetos/{project}/passos/{step}/toggle', [StepController::class, 'toggle'])->name('steps.toggle');
     Route::put('/projetos/{project}/passos/{step}', [StepController::class, 'update'])->name('steps.update');
     Route::delete('/projetos/{project}/passos/{step}', [StepController::class, 'destroy'])->name('steps.destroy');
